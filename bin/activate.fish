@@ -32,7 +32,7 @@ end
 # unset irrelevant variables
 deactivate nondestructive
 
-set -gx VIRTUAL_ENV "/Users/Rod/Dropbox/10o semestre/Sistemas Embebidos/LoggerGui"
+set -gx VIRTUAL_ENV "/Users/Rod/Dropbox/10osemestre/SistemasEmbebidos/LoggerGui"
 
 set -gx _OLD_VIRTUAL_PATH $PATH
 set -gx PATH "$VIRTUAL_ENV/bin" $PATH

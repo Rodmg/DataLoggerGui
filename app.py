@@ -7,6 +7,8 @@ import serial
 from serial.tools import list_ports
 import Tkinter as tk
 from DevControl import DevControl
+from Event import Event
+from MainView import MainView
 
 BAUDRATE = 9600
 
@@ -24,6 +26,8 @@ class SerialSelector:
 		self.disconnectButton = tk.Button(window, text='Desconectar', command=self.disconnect)
 		self.disconnectButton.pack()
 		self.loadPorts()
+
+		self.onPortChanged = Event()
 
 	def loadPorts(self):
 		self.ports = []
@@ -45,6 +49,7 @@ class SerialSelector:
 			self.connection.baudrate = BAUDRATE
 			self.connection.port = self.selectedPort.get()
 			self.connection.open()
+			self.onPortChanged(self.connection)
 
 	def disconnect(self):
 		self.connection.close()
@@ -56,6 +61,8 @@ if __name__ == '__main__':
 	window = tk.Tk()
 	selector = SerialSelector()
 	device = DevControl(selector.connection)
+	mainView = MainView(window, device)
+	selector.onPortChanged.append(device.setConnection)
 	device.daemon = True
 	device.start()
 	window.mainloop()

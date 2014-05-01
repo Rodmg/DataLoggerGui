@@ -25,12 +25,25 @@ Comandos:
 '''
 
 from Comm import Comm
+from Event import Event
 import datetime
 
 class DevControl(Comm):
 	def __init__(self, connection):
 		Comm.__init__(self, connection)
 		self.rxCallback = self.responseCallback
+
+		self.onPing = Event()
+		self.onEraseMemory = Event()
+		self.onNEntries = Event()
+		self.onEntry = Event()
+		self.onGetTime = Event()
+		self.onSetTime = Event()
+		self.onGetHAlarm = Event()
+		self.onSetHAlarm = Event()
+		self.onGetLAlarm = Event()
+		self.onSetLAlarm = Event()
+		self.onGetCurrentTemp = Event()
 
 	def ping(self):
 		self.writeCommand(0)
@@ -51,16 +64,16 @@ class DevControl(Comm):
 		now = datetime.datetime.now()
 		self.writeCommand(5, [now.second, now.minute, now.hour, now.day, now.month, now.year])
 
-	def getTimeAlarm(self):
+	def getHAlarm(self):
 		self.writeCommand(6)
 
-	def setTimeAlarm(self, t):
+	def setHAlarm(self, t):
 		self.writeCommand(7, [t.minute, t.hour])
 
-	def getTempAlarm(self):
+	def getLAlarm(self):
 		self.writeCommand(8)
 
-	def setTempAlarm(self, min, max):
+	def setLAlarm(self, min, max):
 		self.writeCommand(9, [min, max])
 
 	def getCurrentTemp(self):
@@ -73,40 +86,50 @@ class DevControl(Comm):
 
 		if packet.cmd == 0:
 			#Ping response
+			self.onPing()
 			print 'Device present'
 		elif packet.cmd == 1:
 			#Erase memory response
+			self.onEraseMemory()
 			print 'Memory erased ok'
 		elif packet.cmd == 2:
 			#GetNEntries response
 			try:
 				print 'Entries: ' + packet.data[0]
+				self.onNEntries(packet.data[0])
 			except:
 				pass
 		elif packet.cmd == 3:
 			#getEntry response
-			pass
+			try:
+				self.onEntry(packet.data)
+			except:
+				pass
 		elif packet.cmd == 4:
 			#getTime response
-			pass
+			try:
+				self.onGetTime(packet.data)
+			except:
+				pass
 		elif packet.cmd == 5:
 			#setTime response
-			pass
+			self.onSetTime()
 		elif packet.cmd == 6:
-			#getTimeAlarm response
-			pass
+			#getHAlarm response
+			self.onGetHAlarm(packet.data)
 		elif packet.cmd == 7:
-			#setTimeAlarm response
-			pass
+			#setHAlarm response
+			self.onSetHAlarm()
 		elif packet.cmd == 8:
-			#getTempAlarm response
-			pass
+			#getLAlarm response
+			self.onGetLAlarm(packet.data)
 		elif packet.cmd == 9:
-			#setTempAlarm response
-			pass
+			#setLAlarm response
+			self.onSetLAlarm()
 		elif packet.cmd == 9:
 			#getCurrentTemp response
 			try:
 				print 'Temp: ' + packet.data[0]
+				self.onGetCurrentTemp(packet.data[0])
 			except:
 				pass

@@ -27,11 +27,15 @@ class CommPacket:
 class Comm(threading.Thread):
 	def __init__(self, connection):
 		threading.Thread.__init__(self)
-		self.connection = connection
+		self.setConnection(connection)
 		self.rxBuffer = bytearray([])
 		self.packetReceived = False
 		self.rxCounter = 0
 		self.rxCallback = None
+
+	def setConnection(self, connection):
+		# print "conection changed to" + str(connection)
+		self.connection = connection
 
 	def calculateChecksum(self, data):
 		sum = 0;
@@ -66,19 +70,19 @@ class Comm(threading.Thread):
 
 		b = self.connection.read()
 
-		if self.counter == 0:
+		if self.rxCounter == 0:
 			if b != HEADER[0]:
 				self.rxCounter = 0
 				self.rxBuffer = bytearray([])
 				return
-		elif self.counter == 1:
+		elif self.rxCounter == 1:
 			if b != HEADER[1]:
 				self.rxCounter = 0
 				self.rxBuffer = bytearray([])
 				return
-		elif self.counter == 3:
+		elif self.rxCounter == 3:
 			pass
-		elif self.counter == rxBuffer[3] + 4:	#Checksum byte
+		elif self.rxCounter == rxBuffer[3] + 4:	#Checksum byte
 			if self.calculateChecksum(rxBuffer) == b:
 				self.packetReceived = True
 			else:
@@ -87,7 +91,7 @@ class Comm(threading.Thread):
 				return
 
 		self.rxBuffer.append(b)
-		self.counter += 1
+		self.rxCounter += 1
 
 
 	def run(self):
