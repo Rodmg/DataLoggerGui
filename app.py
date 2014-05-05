@@ -6,25 +6,34 @@
 import serial
 from serial.tools import list_ports
 import Tkinter as tk
+import ttk
 from DevControl import DevControl
 from Event import Event
 from MainView import MainView
 
-BAUDRATE = 9600
+BAUDRATE = 19200
 
 class SerialSelector:
 	def __init__(self):
+		self.frame = ttk.Frame(window)
+		self.frame.pack()
+		self.inFrameTop = ttk.Frame(self.frame)
+		self.inFrameBottom = ttk.Frame(self.frame)
+		self.inFrameTop.pack()
+		self.inFrameBottom.pack()
 		self.connection = serial.Serial()
 		self.ports = ['No hay puertos']
 		self.selectedPort = tk.StringVar()
-		self.select = tk.OptionMenu(window, self.selectedPort, *self.ports)
-		self.select.pack()
-		self.reloadButton = tk.Button(window, text='Recargar', command=self.loadPorts)
+		self.portsLabel = ttk.Label(self.inFrameTop, text='Puerto: ')
+		self.portsLabel.pack(side=tk.LEFT)
+		self.select = ttk.OptionMenu(self.inFrameTop, self.selectedPort, *self.ports)
+		self.select.pack(side=tk.LEFT)
+		self.reloadButton = ttk.Button(self.inFrameBottom, text='Recargar puertos', command=self.loadPorts)
 		self.reloadButton.pack(side=tk.LEFT)
-		self.connectButton = tk.Button(window, text='Conectar', command=self.connect)
-		self.connectButton.pack(side=tk.RIGHT)
-		self.disconnectButton = tk.Button(window, text='Desconectar', command=self.disconnect)
-		self.disconnectButton.pack()
+		self.connectButton = ttk.Button(self.inFrameBottom, text='Conectar', command=self.connect)
+		self.connectButton.pack(side=tk.LEFT)
+		self.disconnectButton = ttk.Button(self.inFrameBottom, text='Desconectar', command=self.disconnect)
+		self.disconnectButton.pack(side=tk.LEFT)
 		self.loadPorts()
 
 		self.onPortChanged = Event()
@@ -59,6 +68,7 @@ class SerialSelector:
 
 if __name__ == '__main__':
 	window = tk.Tk()
+	window.configure(background='#E8E9E8')
 	selector = SerialSelector()
 	device = DevControl(selector.connection)
 	mainView = MainView(window, device)

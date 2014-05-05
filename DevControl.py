@@ -77,12 +77,15 @@ class DevControl(Comm):
 		self.writeCommand(9, [min, max])
 
 	def getCurrentTemp(self):
+		print "sent get temp"
 		self.writeCommand(10)
 
 	def responseCallback(self):
 		if not self.packetReceived:
 			return
 		packet = self.readPacket()
+		if packet is None:
+			return
 
 		if packet.cmd == 0:
 			#Ping response
@@ -126,10 +129,10 @@ class DevControl(Comm):
 		elif packet.cmd == 9:
 			#setLAlarm response
 			self.onSetLAlarm()
-		elif packet.cmd == 9:
+		elif packet.cmd == 10:
 			#getCurrentTemp response
 			try:
-				print 'Temp: ' + packet.data[0]
+				print 'Temp: ' + str(packet.data[0])
 				self.onGetCurrentTemp(packet.data[0])
 			except:
 				pass

@@ -15,6 +15,7 @@
 
 import threading
 import time
+import binascii
 
 HEADER = bytearray([0x55, 0xAA])
 
@@ -34,7 +35,7 @@ class Comm(threading.Thread):
 		self.rxCallback = None
 
 	def setConnection(self, connection):
-		# print "conection changed to" + str(connection)
+		print "conection changed to" + str(connection)
 		self.connection = connection
 
 	def calculateChecksum(self, data):
@@ -48,12 +49,13 @@ class Comm(threading.Thread):
 		buffer = HEADER + bytearray([command, len(data)]) + bytearray(data)
 		buffer = buffer + bytearray([self.calculateChecksum(buffer)])
 		if self.connection.isOpen():
+			print binascii.hexlify(buffer)
 			self.connection.write(buffer)
 
 	def readPacket(self):
 		try:
 			self.packetReceived = False
-			packet = CommPacket(rxBuffer[2], rxBuffer[3], rxBuffer[4:4+rxBuffer[3]])
+			packet = CommPacket(self.rxBuffer[2], self.rxBuffer[3], self.rxBuffer[4:4+self.rxBuffer[3]])
 			self.rxCounter = 0
 			self.rxBuffer = bytearray([])
 			return packet
@@ -68,7 +70,10 @@ class Comm(threading.Thread):
 			time.sleep(1)
 			return
 
-		b = self.connection.read()
+		b = ord(self.connection.read())
+
+		# print "received data" + binascii.hexlify(str(b))
+
 
 		if self.rxCounter == 0:
 			if b != HEADER[0]:
@@ -82,13 +87,14 @@ class Comm(threading.Thread):
 				return
 		elif self.rxCounter == 3:
 			pass
-		elif self.rxCounter == rxBuffer[3] + 4:	#Checksum byte
-			if self.calculateChecksum(rxBuffer) == b:
-				self.packetReceived = True
-			else:
-				self.rxCounter = 0
-				self.rxBuffer = bytearray([])
-				return
+		elif self.rxCounter > 3:
+			if self.rxCounter == self.rxBuffer[3] + 4:	#Checksum byte
+				if self.calculateChecksum(self.rxBuffer) == b:
+					self.packetReceived = True
+				else:
+					self.rxCounter = 0
+					self.rxBuffer = bytearray([])
+					return
 
 		self.rxBuffer.append(b)
 		self.rxCounter += 1
@@ -99,6 +105,7 @@ class Comm(threading.Thread):
 		while True:
 			self.rxCheck()
 			if self.packetReceived and self.rxCallback is not None:
+				print "Got packet"
 				self.rxCallback()
 
 
