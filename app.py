@@ -68,6 +68,7 @@ class SerialSelector:
 
 if __name__ == '__main__':
 	window = tk.Tk()
+	window.wm_title('Control DataLogger')
 	window.configure(background='#E8E9E8')
 	selector = SerialSelector()
 	device = DevControl(selector.connection)

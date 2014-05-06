@@ -94,10 +94,19 @@ class MainView:
 
 		self.entriesFrame = ttk.LabelFrame(self.window, text='Registros')
 		self.entriesFrame.pack(expand="yes", fill="both", padx=10, pady=10)
-		self.entriesList = ttk.Treeview(self.entriesFrame, columns=('Fecha', 'Hora', 'Temperatura'), show='headings')
-		self.entriesList.pack(expand=True, fill=tk.BOTH)
+		self.entriesScrollbar = ttk.Scrollbar(self.entriesFrame)
+		self.entriesScrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+		cols = ('Fecha', 'Hora', 'Temperatura')
+		self.entriesList = ttk.Treeview(self.entriesFrame, columns=cols, show='headings', yscrollcommand=self.entriesScrollbar.set)
+		self.entriesList.column('Temperatura', width=50)
+		self.entriesList.column('Fecha', width=100)
+		self.entriesList.column('Hora', width=100)
+		for title in cols:
+			self.entriesList.heading(title, text=title.capitalize())
+		self.entriesScrollbar.config(command=self.entriesList.yview)
+		self.entriesList.pack(side=tk.LEFT, expand=True, fill=tk.BOTH)
 
-		self.outputFrame = ttk.LabelFrame(self.window, text="Output")
+		self.outputFrame = ttk.LabelFrame(self.window, text="Log")
 		self.outputFrame.pack(expand="yes", fill="both", padx=10, pady=10)
 		self.scrollbar = ttk.Scrollbar(self.outputFrame)
 		self.scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
@@ -129,6 +138,8 @@ class MainView:
 		self.entries.nEntries = 0
 		self.entries.entries = []
 		self.data = []
+		for item in self.entriesList.get_children():
+			self.entriesList.delete(item)
 		# Get nEntries
 		# Get entry1
 		# ...
@@ -160,6 +171,8 @@ class MainView:
 		self.entries.entries.append(newEntry)
 		# Append to plotted data
 		self.data.append(newEntry.temp)
+		# Append to entriesList
+		self.entriesList.insert('', 'end', text='Listbox', values=('%d/%d/%d %d:%d %d' % (newEntry.date, newEntry.month, newEntry.year, newEntry.hour, newEntry.min, newEntry.temp)))
 		# Request next entry:
 		index = len(self.entries.entries)
 		if lindex < self.entries.nEntries:
