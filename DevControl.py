@@ -61,23 +61,25 @@ class DevControl(Comm):
 		self.writeCommand(4)
 
 	def setTime(self):
+		# TODO: Implement correctly
 		now = datetime.datetime.now()
 		self.writeCommand(5, [now.second, now.minute, now.hour, now.day, now.month, now.year])
 
 	def getHAlarm(self):
 		self.writeCommand(6)
 
-	def setHAlarm(self, t):
-		self.writeCommand(7, [t.minute, t.hour])
+	def setHAlarm(self, temp):
+		print temp
+		self.writeCommand(7, [temp])
 
 	def getLAlarm(self):
 		self.writeCommand(8)
 
-	def setLAlarm(self, min, max):
-		self.writeCommand(9, [min, max])
+	def setLAlarm(self, temp):
+		print temp
+		self.writeCommand(9, [temp])
 
 	def getCurrentTemp(self):
-		print "sent get temp"
 		self.writeCommand(10)
 
 	def responseCallback(self):

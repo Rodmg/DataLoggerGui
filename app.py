@@ -15,8 +15,8 @@ BAUDRATE = 19200
 
 class SerialSelector:
 	def __init__(self):
-		self.frame = ttk.Frame(window)
-		self.frame.pack()
+		self.frame = ttk.LabelFrame(window, text='Conectar')
+		self.frame.pack(expand="yes", fill="both", padx=10, pady=10)
 		self.inFrameTop = ttk.Frame(self.frame)
 		self.inFrameBottom = ttk.Frame(self.frame)
 		self.inFrameTop.pack()
